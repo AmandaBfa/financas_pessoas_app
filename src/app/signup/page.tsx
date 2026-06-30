@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Wallet, Loader2 } from "lucide-react";
+import { Loader2, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 import { createClient } from "@/lib/supabase/client";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,8 +47,13 @@ export default function SignupPage() {
     });
 
     if (error) {
+      const msg = error.message?.toLowerCase() ?? "";
       toast.error("Não foi possível criar a conta", {
-        description: error.message,
+        description: msg.includes("rate limit")
+          ? "Muitas tentativas de envio de e-mail. Aguarde alguns minutos e tente novamente."
+          : msg.includes("already registered") || msg.includes("already been registered")
+            ? "Este e-mail já está cadastrado. Tente entrar."
+            : error.message,
       });
       setLoading(false);
       return;
@@ -60,36 +66,27 @@ export default function SignupPage() {
       router.refresh();
     } else {
       toast.success("Confira seu e-mail", {
-        description:
-          "Enviamos um link de confirmação para ativar sua conta.",
+        description: "Enviamos um link de confirmação para ativar sua conta.",
       });
       router.push("/login");
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="mb-6 flex items-center justify-center gap-2 text-lg font-bold"
-        >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Wallet className="h-5 w-5" />
-          </div>
-          Finanças Pessoais
-        </Link>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Criar conta</CardTitle>
-            <CardDescription>
-              Comece a organizar suas finanças gratuitamente.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
+    <AuthLayout>
+      <Card className="border-none shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl">Criar conta</CardTitle>
+          <CardDescription>
+            Comece a organizar suas finanças gratuitamente.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -98,10 +95,14 @@ export default function SignupPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
+                  className="pl-9"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
@@ -110,25 +111,26 @@ export default function SignupPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="new-password"
+                  className="pl-9"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                Criar conta
-              </Button>
-            </form>
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              Já tem uma conta?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-primary hover:underline"
-              >
-                Entrar
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Criar conta
+            </Button>
+          </form>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Já tem uma conta?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-primary hover:underline"
+            >
+              Entrar
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    </AuthLayout>
   );
 }
