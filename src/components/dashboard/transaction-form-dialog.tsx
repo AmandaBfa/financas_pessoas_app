@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NewTransaction, Transaction, TransactionType } from "@/lib/types";
-import { categoriesForType } from "@/lib/categories";
+import { categoriesForType, categoryColor } from "@/lib/categories";
 import { todayValue } from "@/lib/utils";
 
 interface TransactionFormDialogProps {
@@ -140,9 +140,10 @@ export function TransactionFormDialog({
                 className={
                   type === "expense"
                     ? "bg-red-600 hover:bg-red-700"
-                    : undefined
+                    : "text-muted-foreground"
                 }
               >
+                <ArrowDownRight className="h-4 w-4" />
                 Despesa
               </Button>
               <Button
@@ -152,9 +153,10 @@ export function TransactionFormDialog({
                 className={
                   type === "income"
                     ? "bg-emerald-600 hover:bg-emerald-700"
-                    : undefined
+                    : "text-muted-foreground"
                 }
               >
+                <ArrowUpRight className="h-4 w-4" />
                 Receita
               </Button>
             </div>
@@ -173,18 +175,24 @@ export function TransactionFormDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Valor (R$)</Label>
-              <Input
-                id="amount"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                min="0"
-                placeholder="0,00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
+              <Label htmlFor="amount">Valor</Label>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
+                  R$
+                </span>
+                <Input
+                  id="amount"
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  className="pl-9 font-medium"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="date">Data</Label>
@@ -207,7 +215,13 @@ export function TransactionFormDialog({
               <SelectContent>
                 {categoryOptions.map((c) => (
                   <SelectItem key={c.name} value={c.name}>
-                    {c.name}
+                    <span className="flex items-center gap-2">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: categoryColor(c.name) }}
+                      />
+                      {c.name}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>

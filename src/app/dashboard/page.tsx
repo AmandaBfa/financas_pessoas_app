@@ -19,14 +19,21 @@ export default function DashboardPage() {
   const { transactions, loading, error, addTransaction } =
     useTransactions(month);
 
-  const { income, expense } = useMemo(() => {
+  const { income, expense, incomeCount, expenseCount } = useMemo(() => {
     let income = 0;
     let expense = 0;
+    let incomeCount = 0;
+    let expenseCount = 0;
     for (const t of transactions) {
-      if (t.type === "income") income += Number(t.amount);
-      else expense += Number(t.amount);
+      if (t.type === "income") {
+        income += Number(t.amount);
+        incomeCount++;
+      } else {
+        expense += Number(t.amount);
+        expenseCount++;
+      }
     }
-    return { income, expense };
+    return { income, expense, incomeCount, expenseCount };
   }, [transactions]);
 
   async function handleAdd(input: NewTransaction) {
@@ -75,7 +82,12 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          <SummaryCards income={income} expense={expense} />
+          <SummaryCards
+            income={income}
+            expense={expense}
+            incomeCount={incomeCount}
+            expenseCount={expenseCount}
+          />
           <CategoryPieChart transactions={transactions} />
         </>
       )}
